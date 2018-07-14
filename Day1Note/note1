@@ -1,4 +1,21 @@
+视频地址：https://ke.qq.com/webcourse/index.html#course_id=254278&term_id=100299829&taid=1561426770780486&vid=q1422up50wp
 自然语言处理：snowNLP
 pip install snownlp
 NLP: 分词，标记(词性，名词、介词、形容词、动词等），提取
 应用场景：情感分析 snowNLP('XXXXXXX').sentiments  舆情分析
+------------------------------------------------
+NLTK 工业级NLP库 词库列表：www.nltk.org/nltk_data  书籍列表：www.nltk.org/book
+用于：分类、分词、标签、提取、解析、语义推理
+pip install nltk
+nltk.download()
+nltk.word_tokenize('xxxxx')  分词 
+nltk.pos_tag('分词')  打标签、标签
+nltk.chunk.ne_chunk('标签')  分类串成树
+nltk.corpus.brown.words() 语料库
+text.similar('xxx') 相近词
+
+--------------------------------------------------
+名字预测男女
+nltk.corpus.names.words('文件名') 引入文件所有男女人名，特征提取
+random.shuffle(tuple) 对字符串进行打乱，随机
+
