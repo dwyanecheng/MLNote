@@ -24,3 +24,11 @@ random.shuffle(tuple) 对字符串进行打乱，随机
 
 --------------------------------------------------------
 jieba 分词
+www.oschina.net/p/jieba
+pip install jieba
+jieba.cut('xxxx') 中文分词 cut_all = true 所有可能的组词都切出来
+posseg.cut() 切词加语法
+NLTK + jieba
+tags = [(items.word , items.flag) for items in list(jieba.posseg.cut('xxx'))]  中文语法切词
+nltk.chunk.ne_chunk(tags)  对语法分类串树
+
