@@ -18,4 +18,9 @@ text.similar('xxx') 相近词
 名字预测男女
 nltk.corpus.names.words('文件名') 引入文件所有男女人名，特征提取
 random.shuffle(tuple) 对字符串进行打乱，随机
+训练：nltk.NaiveBayesClassifier.train(xxxx)
+测试：[1 if classifier.classify(features) == gender else 0 for (features, gender) in test_set] 推导式，三元表达式
+特征： 最后一个字母+第一个字母
 
+--------------------------------------------------------
+jieba 分词
