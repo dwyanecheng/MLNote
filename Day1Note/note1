@@ -1,0 +1,4 @@
+自然语言处理：snowNLP
+pip install snownlp
+NLP: 分词，标记(词性，名词、介词、形容词、动词等），提取
+应用场景：情感分析 snowNLP('XXXXXXX').sentiments  舆情分析
