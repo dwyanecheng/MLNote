@@ -32,3 +32,30 @@ NLTK + jieba
 tags = [(items.word , items.flag) for items in list(jieba.posseg.cut('xxx'))]  中文语法切词
 nltk.chunk.ne_chunk(tags)  对语法分类串树
 
+---------------------------------------------------------
+新闻分类：
+1、先找到代表性的词 ——————最常出现的N个词
+2、
+
+os.listdir(os.getcwd()+'/xxx/') 读取文件目录
+open(os.getcwd()+path+'/'+filename , 'r', encoding='utf-8') 读取文件内容
+d = nltk.probability.FreqDist(jieba.cut(content)) 对单词出现评率进行统计
+l = sorted(list(d.items()) , key = lambda x : x[1] , reverse = true)[:10]  对单词出现频率进行排序,取前十个
+
+words = [w for (w , c) in l]
+提取特征函数：
+def getFeature(content):
+result = {}
+for w in words:
+  resule[w] = 0
+l = list(jieba.cut(content))
+for w in l :
+  if w in words :
+    result[w] += 1
+return result
+
+
+
+
+
+
