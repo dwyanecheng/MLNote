@@ -1,0 +1,82 @@
+
+
+import pandas as pd
+import numpy as np
+
+userAll = pd.read_csv('tianchi_fresh_comp_train_user.csv',
+                      usecols = ['user_id','item_id','behavior_type','time']) #导入user数据
+# print(userAll.info())
+
+itemSub = pd.read_csv('tianchi_fresh_comp_train_item.csv',usecols = ['item_id']) #导入商品数据
+itemSet = itemSub[['item_id']].drop_duplicates() #去除重复的行
+# print(itemset.info())
+
+userSub = pd.merge(userAll,itemSet,on = 'item_id',how = 'inner') #关联user表与商品表，用item_id
+# print(userSub.info())
+
+userSub.to_csv('userSub.csv') # 保存数据
+
+userSub = pd.read_csv('userSub.csv',usecols = ['user_id','item_id','behavior_type','time'],parse_dates = True)  #只取用戶，商品，行為，時間 parse_dates 如果为True - >尝试解析索引
+# print(userSub.head())
+userSub = userSub.sort_index().copy()
+# print(userSub.index)
+
+typeDummies = pd.get_dummies(userSub['behavior_type'],prefix = 'type')#onehot哑变量编码
+
+userSubOneHot = pd.concat([userSub[['user_id','item_id','time']],typeDummies],axis = 1) #對數據進行拼接
+
+usertem = pd.concat([userSub[['user_id','item_id']],typeDummies,userSub[['time']]],axis = 1)#将哑变量特征加入数据表中
+
+userSubOneHotGroup = userSubOneHot.groupby(['time','user_id','item_id'],as_index = False).sum()#另外一种方法是在sum（）后使用.reset_index()
+
+userSubOneHotGroup['time_day'] = pd.to_datetime(userSubOneHotGroup.time.values).date
+
+userSubOneHotGroup['time_hour'] = pd.to_datetime(userSubOneHotGroup.time.values).time
+
+dataHour = userSubOneHotGroup.ix[:,0:7]
+
+dataHour.to_csv('dataHour.csv')
+
+dataDay = userSubOneHotGroup.groupby(['time_day','user_id','item_id'],as_index = False).sum()
+
+dataDay.to_csv('dataDay.csv')
+
+dataDay_load = pd.read_csv('dataDay.csv',usecols = ['time_day','user_id','item_id','type_1','type_2','type_3','type_4'], index_col = 'time_day',parse_dates = True)
+
+train_x = dataDay_load.ix['2014-12-14':'2014-12-16',:]#16号选取特征数据集
+
+train_y = dataDay_load.ix['2014-12-17',['user_id','item_id','type_4']]#17号的购买行为作为分类标签
+
+dataSet = pd.merge(train_x,train_y, on = ['user_id','item_id'],suffixes=('_x','_y'), how = 'left').fillna(0.0)#特征数据和标签数据构成训练数据集
+
+dataSet['labels'] = dataSet.type_4_y.map(lambda x: 1.0 if x > 0.0 else 0.0 )
+
+trainSet = dataSet.copy()#重命名并保存训练数据集
+
+trainSet.to_csv('trainSet.csv')
+
+test_x = dataDay_load.ix['2014-12-17',:]#17号特征数据集，最为测试输入数据集
+
+test_y = dataDay_load.ix['2014-12-18',['user_id','item_id','type_4']]#18号购买行为作为测试标签数据集
+
+testSet = pd.merge(test_x,test_y, on = ['user_id','item_id'],suffixes=('_x','_y'), how = 'left').fillna(0.0)#构成测试数据集
+
+testSet['labels'] = testSet.type_4_y.map(lambda x: 1.0 if x > 0.0 else 0.0 )
+
+testSet.to_csv('testSet.csv')
+
+
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+
+model.fit(trainSet.ix[:,2:6],trainSet.ix[:,-1])
+
+LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+              intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+              penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+              verbose=0, warm_start=False)
+print(model.score(trainSet.ix[:,2:6],trainSet.ix[:,-1]))
+
+train_y_est =model.predict(trainSet.ix[:,2:6])
+
