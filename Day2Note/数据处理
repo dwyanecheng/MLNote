@@ -1,0 +1,40 @@
+深度学习，神经网络的可解释性差，因为是黑盒的，当出现问题的时候，很难定位问题发生的地方，从而调试起来非常麻烦。
+一般都会有深度神经网络与机器学习算法，几种模型同时进行训练，当深度神经网络出现问题的时候，就可以看机器学习的模型。
+百度的点击率预测，baseline是逻辑回归模型，点击or不点击，现在很多都用的是深度学习神经网络
+用图形做可视化，py.matplotlib
+pd.read_csv()读取文件
+
+
+----------------------------------------------------------------------------
+天池离线比赛 预测商品购买行为：
+1、导入用户数据、导入商品数据，对数据进行去重 drop_duplicates()
+2、用商品ID ‘itemID’ 关联用户数据与商品数据
+数据降维：
+3、对数据只取用户ID，商品ID，商品行为behavior_type，时间time，这四列；用parse_dates时间作为索引
+4、对商品行为进行onehot编码，pd.get_dummies(userSub['behavior_type'],prefix = 'type')
+5、对数据进行重新拼接，pd.concat([userSub[['user_id','item_id','time']],typeDummies],axis = 1)
+6、对时间特征进行处理，userSubOneHotGroup['time_day'] = pd.to_datetime(userSubOneHotGroup.time.values).date
+7、生成新的数据进行存储，dataDay = userSubOneHotGroup.groupby(['time_day','user_id','item_id'],as_index = False).sum()
+                       dataDay.to_csv('dataDay.csv')
+8、选取部分数据作为训练数据输入x，train_x = dataDay_load.ix['2014-12-14':'2014-12-16',:]#14-16号选取特征数据集
+9、选取17号为标签y，train_y = dataDay_load.ix['2014-12-17',['user_id','item_id','type_4']]#17号的购买行为作为分类标签
+10、dataSet = pd.merge(train_x,train_y, on = ['user_id','item_id'],suffixes=('_x','_y'), how = 'left').fillna(0.0)#特征数据和标签数据构成训练数据集
+11、对type_4做标签处理，dataSet['labels'] = dataSet.type_4_y.map(lambda x: 1.0 if x > 0.0 else 0.0 )
+
+使用逻辑回归进行模型训练
+model = LogisticRegression()
+model.fit(trainSet.ix[:,2:6],trainSet.ix[:,-1])
+LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+              intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+              penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+              verbose=0, warm_start=False)
+              
+改进思路：
+1、对商品行为进行onehot编码后，对相同用户、相同商品的type——1/2/3/4进行汇总集合，对用户行为进行求概率平均
+  Σ（type4/type1）.mean求和求平均，作为商品查看对应购买概率，依次类推，type2，type3
+2、统计用户15-17号的所有行为，对tpye1/2/3的概率相乘，求18号的购买概率
+
+---------------------------------------------------------------------------------------
+
+
+
